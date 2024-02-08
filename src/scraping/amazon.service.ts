@@ -62,18 +62,59 @@ export class AmazonService {
 
       await Promise.all([
         page.waitForNavigation(),
-        page.goto('https://c.howazit.com/e/3351211416?abts=1707249802229', {
-          waitUntil: 'domcontentloaded',
-        }),
+        page.goto(
+          'https://c.howazit.com/m/CampaignReview/ShowReview?reviewId=5746600820&token=133519461549024192%253AcRhv5QOvBVMkWudv632tUVADX03xALJykedAcwgURE3P_wTLInVEhLrHwQ99X7l34oWk8S_-RnbGFq3pGD8Y4gOgNSUgdLg22qPHDcL0a998JICJ6Ms4z63wnpkcqtPj4dVT9GzvWscYOk4RRwf3xREssLswX3Is5RWWkgHlc_8&utm_campaign=I%7C5746600818%7C5746600817&utm_source=B%7C2373455389%7C1215931365&utm_medium=F%7C3351211410&_hwz.i=5746600819&_hwz.t=133519461549034217%3AETeMbC18zYrCjwsa-dJfYKzjj0MdbaczGo22I1vcVyWg4-60PXNQwtYSRbeSdcwM-sTxuYt2LIEWvwv-Il_6FW3fut5Lb0v8muNMCKdkyG1gEI8Jv-kFle0YWyZbXI3KJvTsuEQpUzquwj8mGi9YcLivPNd5vD9YIBv9k8P9bb0',
+          {
+            waitUntil: 'domcontentloaded',
+          },
+        ),
       ]);
-      await page.waitForSelector('#inputDiv', {
-        visible: true,
-        timeout: 0,
-      }),
-        await page.waitForSelector('#inputDiv', {
-          visible: true,
-          timeout: 0,
-        });
+      const timer = 10000;
+
+      await new Promise((resolve) => setTimeout(resolve, timer));
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const retryFn = async (fn, retriesLeft = 5, interval = 10000) => {
+        try {
+          console.log('Retries left:', retriesLeft);
+          return await fn();
+        } catch (error) {
+          if (retriesLeft) {
+            await new Promise((resolve) => setTimeout(resolve, interval));
+            return retryFn(fn, retriesLeft - 1);
+          }
+          throw new Error('Max retries reached');
+        }
+      };
+
+      await retryFn(
+        async () => {
+          await page.waitForSelector('li[num="1"]');
+          await page.click('li[num="1"]');
+        },
+        5,
+        10000,
+      );
+
+      await retryFn(
+        async () => {
+          await page.waitForSelector('#send');
+          await page.click('#send');
+        },
+        5,
+        10000,
+      );
+
+      await retryFn(
+        async () => {
+          const num = '0587091495';
+          const input = await page.$('#inputVal');
+          input.type(num);
+        },
+        5,
+        10000,
+      );
+
       const titleHandle = await page.$('title');
       const html = await page.evaluate(
         (title) => title.textContent,
@@ -90,9 +131,8 @@ export class AmazonService {
       const html2 = await page.evaluate((body) => body.innerHTML, bodyHandle);
       await bodyHandle.dispose();
       console.log(html2);
-      return html2;
+      // return html2;
     } finally {
-      await browser.close();
     }
   }
 }

@@ -8,6 +8,6 @@ export class AmazonController {
 
   @Get('products')
   getProducts(@Query('product') product: string) {
-    return this.amazonService.getProducts(product);
+    return this.amazonService.IEC();
   }
 }
