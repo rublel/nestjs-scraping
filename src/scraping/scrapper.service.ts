@@ -7,7 +7,9 @@ export class ScrapperService {
     const response = await fetch(url);
     const html = await response.text();
     const $ = cheerio.load(html);
-
+    const totalSize = Number(
+      $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
+    );
     const products = [];
     $('div[class^="product-block-top-main"]').each((index, element) => {
       const delivery = $(element).find('.dpb-leadtime').text();
@@ -48,15 +50,17 @@ export class ScrapperService {
         withDiscount: discountDate.length > 0,
         beforeDiscount: this.formatPriceToNumber(beforeDiscount),
         discountAmount: this.formatPriceToNumber(discountAmount),
-        discountDate,
+        ...(discountDate && { discountDate }),
         delivery,
       });
     });
 
-    return products;
+    return { totalSize, records: products };
   }
 
   private formatPriceToNumber(price) {
-    return price && Number(price?.trim()?.replace('-', '')?.replace('€', ''));
+    return price
+      ? Number(price?.trim()?.replace('-', '')?.replace('€', ''))
+      : undefined;
   }
 }
