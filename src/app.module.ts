@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AmazonModule } from './scraping/amazon.module';
+import { ScrapperModule } from './scraping/scrapper.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AmazonModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), ScrapperModule],
   controllers: [],
   providers: [],
 })
