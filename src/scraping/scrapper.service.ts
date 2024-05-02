@@ -3,42 +3,32 @@ import cheerio from 'cheerio';
 @Injectable()
 export class ScrapperService {
   async exec({ gender, category, from, size }) {
-    const url = `https://www.decathlon.fr/${gender}/${category}?from=${from}&size=${size}`;
-    const response = await fetch(url);
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    const totalSize = Number(
-      $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
-    );
-    const products = [];
+    const url = `https://www.decathlon.fr/${gender}/${category}?from=${from}&size=${size}`,
+      response = await fetch(url),
+      html = await response.text(),
+      $ = cheerio.load(html),
+      totalSize = Number(
+        $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
+      ),
+      records = [];
     $('div[class^="product-block-top-main"]').each((index, element) => {
-      const delivery = $(element).find('.dpb-leadtime').text();
-      const title = $(element).find('.product-title h2').text();
-      const brand = $(element).find('.product-title strong').text();
-      const price = $(element).find('.vtmn-price_size--large').text().trim();
-      const beforeDiscount = $(element)
-        .find('.price-discount-informations .vtmn-price')
-        .text()
-        .trim();
-      const discountAmount = $(element)
-        .find('.price-discount-amount')
-        .text()
-        .trim();
-      const img = $(element).find('.svelte-11itto').attr('src');
-      const discountDate = $(element)
-        .find('.discount-date')
-        .text()
-        .trim()
-        .replace('*', '');
-      const link =
-        'https://www.decathlon.fr' +
-        $(element).find('.dpb-product-model-link').attr('href');
-      const reference = new URLSearchParams(new URL(link).search).get('mc');
-      const color = new URLSearchParams(new URL(link).search)
-        .get('c')
-        ?.replace('_', ' ');
+      const e = $(element);
+      const delivery = e.find('.dpb-leadtime').text(),
+        title = e.find('.product-title h2').text(),
+        brand = e.find('.product-title strong').text(),
+        price = e.find('.vtmn-price_size--large').text().trim(),
+        img = e.find('.svelte-11itto').attr('src'),
+        link = `https://www.decathlon.fr${e.find('.dpb-product-model-link').attr('href')}`,
+        urlParams = new URLSearchParams(new URL(link).search),
+        color = urlParams.get('c')?.replace('_', ' '),
+        reference = urlParams.get('mc'),
+        discountAmount = e.find('.price-discount-amount').text(),
+        discountDate = e.find('.discount-date').text().replace('*', ''),
+        beforeDiscount = e
+          .find('.price-discount-informations .vtmn-price')
+          .text();
 
-      products.push({
+      records.push({
         title,
         brand,
         reference,
@@ -55,7 +45,7 @@ export class ScrapperService {
       });
     });
 
-    return { totalSize, records: products };
+    return { totalSize, records };
   }
 
   private formatPriceToNumber(price) {
