@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export const HierarchyConfig = [
   {
     section: 'femme',
@@ -39,4 +41,11 @@ export const HierarchyConfig = [
     section: 'enfant-bebe',
     categories: ['chaussures-enfant', 'equipements-enfant-bebe'],
   },
-];
+] as const;
+
+export class HierarchyConfigResponse {
+  @ApiProperty({ example: 'femme' })
+  section: string;
+  @ApiProperty({ example: ['vetements', 'maillots-de-bain'] })
+  categories: string[];
+}
