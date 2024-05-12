@@ -9,8 +9,13 @@ import {
 } from '@nestjs/common';
 import { ScrapperService } from './scrapper.service';
 import { ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
 import { ApiRecordsResponse } from 'src/config/documentation/api.response.decorator';
+import {
+  GetProducsQueryDto,
+  GetProductsParamsDto,
+} from './dtos/get-products.dto';
+import { GetProductParamsDto } from './dtos/get-product.dto';
 
 @ApiTags(ScrapperService.name)
 @Controller('scrapper')
@@ -18,27 +23,26 @@ export class ScrapperController {
   constructor(private readonly scrapperService: ScrapperService) {}
 
   @Get('decathlon/:section/:category')
-  @ApiParam({ name: 'from', type: 'number', required: false })
-  @ApiParam({ name: 'size', type: 'number', required: false })
   @ApiRecordsResponse({ type: [Product], status: 200, isArray: true })
   @HttpCode(HttpStatus.OK)
   async getCatalogData(
-    @Param('section') section: string,
-    @Param('category') category: string,
-    @Query('from') from?: number,
-    @Query('size') size?: number,
+    @Param() { section, category }: GetProductsParamsDto,
+    @Query() { from, size }: GetProducsQueryDto,
   ) {
-    return this.scrapperService.exec({ section, category, from, size });
+    return this.scrapperService.exec({
+      section,
+      category,
+      from,
+      size,
+    });
   }
 
-  @Get('decathlon/:section/:category/:id')
+  @Get('decathlon/:section/:category/:reference')
   @ApiRecordsResponse({ type: Product, status: 200, isArray: false })
   @HttpCode(HttpStatus.OK)
   async getProductData(
-    @Param('section') section: string,
-    @Param('category') category: string,
-    @Param('id') id: string,
+    @Param() { section, category, reference }: GetProductParamsDto,
   ) {
-    return this.scrapperService.search({ section, category, id });
+    return this.scrapperService.search({ section, category, reference });
   }
 }

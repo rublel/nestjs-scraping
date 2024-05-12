@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
 @Injectable()
 export class ScrapperService {
   private LocalCache = {};
@@ -71,11 +71,11 @@ export class ScrapperService {
     return { totalSize, records };
   }
 
-  async search({ section, category, id }) {
+  async search({ section, category, reference }) {
     const data = await this.exec({ section, category });
     if (!data.records.length) return new Error('No records found');
     const totalProducts = data.totalSize;
-    let product = data.records.find((record) => record.reference === id);
+    let product = data.records.find((record) => record.reference === reference);
     if (!product) {
       const numberOfBatches = Math.ceil(totalProducts / 40) - 1;
       const promises = Array.from({ length: numberOfBatches }, (_, i) => {
@@ -83,7 +83,8 @@ export class ScrapperService {
       });
       const results = await Promise.all(promises);
       const records = results.flatMap((result) => result.records);
-      product = records.find((record) => record.reference === id) || null;
+      product =
+        records.find((record) => record.reference === reference) || null;
     }
     if (!product) return new Error('Product not found');
     return { record: product };
