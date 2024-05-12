@@ -10,10 +10,10 @@ import {
 import { ScrapperService } from './scrapper.service';
 import { ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Product } from './product.entity';
-import { ApiRecordsResponse } from 'src/config/swagger/api.response.decorator';
+import { ApiRecordsResponse } from 'src/config/documentation/api.response.decorator';
 
 @ApiTags(ScrapperService.name)
-@Controller()
+@Controller('scrapper')
 export class ScrapperController {
   constructor(private readonly scrapperService: ScrapperService) {}
 

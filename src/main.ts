@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SWAGGER } from './config/swagger/swagger.constants';
+import { SWAGGER } from './config/documentation/swagger.constants';
 import * as basicAuth from 'express-basic-auth';
-import { generateSwaggerApi } from './config/swagger';
+import { generateSwaggerApi } from './config/documentation';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
