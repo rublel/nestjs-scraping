@@ -71,7 +71,7 @@ export class ScrapperService {
     return { totalSize, records };
   }
 
-  async getProductData({ section, category, id }) {
+  async search({ section, category, id }) {
     const data = await this.exec({ section, category });
     if (!data.records.length) return new Error('No records found');
     const totalProducts = data.totalSize;

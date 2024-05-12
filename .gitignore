@@ -37,3 +37,6 @@ lerna-debug.log*
 # Env files
 .env*
 !.env.example
+
+# Docs
+/docs
