@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
-import { Product } from './product.interface';
+import { Product } from './product.entity';
 @Injectable()
 export class ScrapperService {
   private LocalCache = {};
@@ -23,9 +23,9 @@ export class ScrapperService {
     from?: number;
     size?: number;
   }): Promise<{ totalSize: number; records: Product[] }> {
-    if (this.LocalCache[`${section}-${category}-${from}-${size}`]) {
-      return this.LocalCache[`${section}-${category}-${from}-${size}`];
-    }
+    const cacheKey = `${section}-${category}-${from}-${size}`;
+    if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
+
     const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
       response = await fetch(url),
       html = await response.text(),
@@ -39,45 +39,33 @@ export class ScrapperService {
       const delivery = e.find('.dpb-leadtime').text(),
         title = e.find('.product-title h2').text(),
         brand = e.find('.product-title strong').text(),
-        price = e.find('.vtmn-price_size--large').text().trim(),
+        price = e.find('.vtmn-price_size--large').text(),
         img = e.find('.svelte-11itto').attr('src'),
         link = `https://www.decathlon.fr${e.find('.dpb-product-model-link').attr('href')}`,
-        urlParams = new URLSearchParams(new URL(link).search),
-        color = urlParams.get('c')?.replace('_', ' ') || 'N/A',
-        reference = urlParams.get('mc'),
         discountAmount = e.find('.price-discount-amount').text(),
-        discountDateInfo = e
-          .find('.discount-date')
-          .text()
-          .replace('*', '')
-          .replace(/\n/g, '')
-          .trim(),
+        discountDateInfo = e.find('.discount-date').text(),
         beforeDiscount = e
           .find('.price-discount-informations .vtmn-price')
           .text();
 
-      const product: Product = {
+      const product = new Product({
         title,
         brand,
-        reference,
-        color,
         img,
         link,
-        currency: '€',
-        price: this.formatPriceToNumber(price),
-        withDiscount: discountDateInfo.length > 0,
-        beforeDiscount: this.formatPriceToNumber(beforeDiscount),
-        discountAmount: this.formatPriceToNumber(discountAmount),
-        ...(discountDateInfo && { discountDateInfo }),
+        price,
+        beforeDiscount,
+        discountAmount,
         delivery,
-      };
+        ...(discountDateInfo && { discountDateInfo }),
+      });
 
       records.push(product);
     });
 
     this.LocalCache = {
       ...this.LocalCache,
-      [`${section}-${category}-${from}-${size}`]: { totalSize, records },
+      [cacheKey]: { totalSize, records },
     };
 
     return { totalSize, records };
@@ -99,11 +87,5 @@ export class ScrapperService {
     }
     if (!product) return new Error('Product not found');
     return { record: product };
-  }
-
-  private formatPriceToNumber(price) {
-    return price
-      ? Number(price?.trim()?.replace('-', '')?.replace('€', ''))
-      : undefined;
   }
 }
