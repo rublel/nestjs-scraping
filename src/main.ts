@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-// import { SWAGGER } from './config/swagger/swagger.constants';
-// import * as basicAuth from 'express-basic-auth';
+import { SWAGGER } from './config/swagger/swagger.constants';
+import * as basicAuth from 'express-basic-auth';
 import { generateSwaggerApi } from './config/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
 
-  // app.use([`${SWAGGER.ROUTE}`], basicAuth(SWAGGER.AUTH));
+  app.use([`${SWAGGER.ROUTE}`], basicAuth(SWAGGER.AUTH));
+  app.setGlobalPrefix('api/v1');
   generateSwaggerApi({
     app,
     appConfig: {
