@@ -1,8 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
+import { Product } from './product.interface';
 @Injectable()
 export class ScrapperService {
-  async exec({ section, category, from, size }) {
+  async exec({
+    section,
+    category,
+    from,
+    size,
+  }: {
+    section: string;
+    category?: string;
+    from?: number;
+    size?: number;
+  }): Promise<{ totalSize: number; records: Product[] }> {
     const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
       response = await fetch(url),
       html = await response.text(),
@@ -10,7 +21,7 @@ export class ScrapperService {
       totalSize = Number(
         $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
       ),
-      records = [];
+      records: Product[] = [];
     $('div[class^="product-block-top-main"]').each((index, element) => {
       const e = $(element);
       const delivery = e.find('.dpb-leadtime').text(),
@@ -20,15 +31,20 @@ export class ScrapperService {
         img = e.find('.svelte-11itto').attr('src'),
         link = `https://www.decathlon.fr${e.find('.dpb-product-model-link').attr('href')}`,
         urlParams = new URLSearchParams(new URL(link).search),
-        color = urlParams.get('c')?.replace('_', ' '),
+        color = urlParams.get('c')?.replace('_', ' ') || 'N/A',
         reference = urlParams.get('mc'),
         discountAmount = e.find('.price-discount-amount').text(),
-        discountDate = e.find('.discount-date').text().replace('*', ''),
+        discountDateInfo = e
+          .find('.discount-date')
+          .text()
+          .replace('*', '')
+          .replace(/\n/g, '')
+          .trim(),
         beforeDiscount = e
           .find('.price-discount-informations .vtmn-price')
           .text();
 
-      records.push({
+      const product: Product = {
         title,
         brand,
         reference,
@@ -37,34 +53,40 @@ export class ScrapperService {
         link,
         currency: '€',
         price: this.formatPriceToNumber(price),
-        withDiscount: discountDate.length > 0,
+        withDiscount: discountDateInfo.length > 0,
         beforeDiscount: this.formatPriceToNumber(beforeDiscount),
         discountAmount: this.formatPriceToNumber(discountAmount),
-        ...(discountDate && { discountDate }),
+        ...(discountDateInfo && { discountDateInfo }),
         delivery,
-      });
+      };
+
+      records.push(product);
     });
 
     return { totalSize, records };
+  }
+
+  async getProductData({ section, category, id }) {
+    const data = await this.exec({ section, category });
+    if (!data.records.length) return new Error('No records found');
+    const totalProducts = data.totalSize;
+    let product = data.records.find((record) => record.reference === id);
+    if (!product) {
+      const numberOfBatches = Math.ceil(totalProducts / 40) - 1;
+      const promises = Array.from({ length: numberOfBatches }, (_, i) => {
+        return this.exec({ section, category, from: 40 * (i + 1), size: 40 });
+      });
+      const results = await Promise.all(promises);
+      const records = results.flatMap((result) => result.records);
+      product = records.find((record) => record.reference === id) || null;
+    }
+    if (!product) return new Error('Product not found');
+    return { record: product };
   }
 
   private formatPriceToNumber(price) {
     return price
       ? Number(price?.trim()?.replace('-', '')?.replace('€', ''))
       : undefined;
-  }
-
-  async getProductData({ section, category, id }) {
-    let from = 0;
-    let data = await this.exec({ section, category, from, size: 40 });
-    let product = data.records.find((record) => record.reference === id);
-    if (!product) {
-      while (!product) {
-        from += 40;
-        data = await this.exec({ section, category, from, size: 40 });
-        product = data.records.find((record) => record.reference === id);
-      }
-    }
-    return { record: product };
   }
 }
