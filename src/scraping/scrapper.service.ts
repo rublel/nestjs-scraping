@@ -3,6 +3,10 @@ import cheerio from 'cheerio';
 import { Product } from './product.interface';
 @Injectable()
 export class ScrapperService {
+  private LocalCache = {};
+  constructor() {
+    this.LocalCache = {};
+  }
   async exec({
     section,
     category,
@@ -14,6 +18,9 @@ export class ScrapperService {
     from?: number;
     size?: number;
   }): Promise<{ totalSize: number; records: Product[] }> {
+    if (this.LocalCache[`${section}-${category}-${from}-${size}`]) {
+      return this.LocalCache[`${section}-${category}-${from}-${size}`];
+    }
     const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
       response = await fetch(url),
       html = await response.text(),
@@ -62,6 +69,11 @@ export class ScrapperService {
 
       records.push(product);
     });
+
+    this.LocalCache = {
+      ...this.LocalCache,
+      [`${section}-${category}-${from}-${size}`]: { totalSize, records },
+    };
 
     return { totalSize, records };
   }
