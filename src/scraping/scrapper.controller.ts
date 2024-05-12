@@ -25,7 +25,7 @@ export class ScrapperController {
   @Get('decathlon/:section/:category')
   @ApiRecordsResponse({ type: [Product], status: 200, isArray: true })
   @HttpCode(HttpStatus.OK)
-  async getCatalogData(
+  async scrap(
     @Param() { section, category }: GetProductsParamsDto,
     @Query() { from, size }: GetProducsQueryDto,
   ) {
@@ -40,9 +40,7 @@ export class ScrapperController {
   @Get('decathlon/:section/:category/:reference')
   @ApiRecordsResponse({ type: Product, status: 200, isArray: false })
   @HttpCode(HttpStatus.OK)
-  async getProductData(
-    @Param() { section, category, reference }: GetProductParamsDto,
-  ) {
+  async search(@Param() { section, category, reference }: GetProductParamsDto) {
     return this.scrapperService.search({ section, category, reference });
   }
 }
