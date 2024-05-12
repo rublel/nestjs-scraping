@@ -12,7 +12,7 @@ export const SWAGGER = {
   ENVS: ['dev', 'uat', 'prod'],
   ROUTE: '/api/v1/doc',
   AUTH: {
-    challenge: false,
+    challenge: true,
     users: {
       [process.env.SWAGGER_USERNAME]: process.env.SWAGGER_PASSWORD,
     },
