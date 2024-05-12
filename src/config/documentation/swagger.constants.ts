@@ -2,7 +2,7 @@ export const SWAGGER = {
   SITE: {
     DESCRIPTION: 'POSB2C Middleware API Documentation',
     SITE_TITLE: 'POSB2C - Middleware - Documentation',
-    TITLE: 'POSBC - Middleware',
+    TITLE: 'POSB2C - Middleware',
     VERSION: '0.0.1',
   },
   SERVER: {
