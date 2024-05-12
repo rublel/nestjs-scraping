@@ -1,16 +1,33 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class Product {
+  @ApiProperty({ example: 'Pantalon de trek montagne résistant Homme - MT500' })
   title: string;
+  @ApiProperty({ example: 'FORCLAZ' })
   brand: string;
+  @ApiProperty({ example: 'gris noir' })
   color?: string;
+  @ApiProperty({ example: '8853731' })
   reference?: string;
   img: string;
+  @ApiProperty({
+    example:
+      'https://www.decathlon.fr/p/pantalon-de-trek-montagne-resistant-homme-mt500/_/R-p-351265?mc=8853731&c=gris_noir',
+  })
   link: string;
+  @ApiProperty({ example: '€' })
   currency?: string;
+  @ApiProperty({ example: 36 })
   price: number | string;
+  @ApiProperty({ example: true })
   withDiscount?: boolean;
+  @ApiProperty({ example: 'Livraison en 48h' })
   delivery?: string;
+  @ApiProperty({ example: 40 })
   beforeDiscount?: number | string;
+  @ApiProperty({ example: 4 })
   discountAmount?: number | string;
+  @ApiProperty({ example: 'Offre valable jusqu’au 31/12/2021' })
   discountDateInfo?: string;
 
   constructor(product: Omit<Product, 'formatPriceToNumber'>) {
