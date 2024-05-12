@@ -6,13 +6,22 @@ import { ScrapperService } from './scrapper.service';
 export class ScrapperController {
   constructor(private readonly scrapperService: ScrapperService) {}
 
-  @Get('decathlon/:gender/:category')
+  @Get('decathlon/:section/:category')
   async getCatalogData(
-    @Param('gender') gender: string,
+    @Param('section') section: string,
     @Param('category') category: string,
     @Query('from') from: number,
     @Query('size') size: number,
   ) {
-    return this.scrapperService.exec({ gender, category, from, size });
+    return this.scrapperService.exec({ section, category, from, size });
+  }
+
+  @Get('decathlon/:section/:category/:id')
+  async getProductData(
+    @Param('section') section: string,
+    @Param('category') category: string,
+    @Param('id') id: string,
+  ) {
+    return this.scrapperService.getProductData({ section, category, id });
   }
 }

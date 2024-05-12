@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 @Injectable()
 export class ScrapperService {
-  async exec({ gender, category, from, size }) {
-    const url = `https://www.decathlon.fr/${gender}/${category}?from=${from}&size=${size}`,
+  async exec({ section, category, from, size }) {
+    const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
       response = await fetch(url),
       html = await response.text(),
       $ = cheerio.load(html),
@@ -52,5 +52,19 @@ export class ScrapperService {
     return price
       ? Number(price?.trim()?.replace('-', '')?.replace('€', ''))
       : undefined;
+  }
+
+  async getProductData({ section, category, id }) {
+    let from = 0;
+    let data = await this.exec({ section, category, from, size: 40 });
+    let product = data.records.find((record) => record.reference === id);
+    if (!product) {
+      while (!product) {
+        from += 40;
+        data = await this.exec({ section, category, from, size: 40 });
+        product = data.records.find((record) => record.reference === id);
+      }
+    }
+    return { record: product };
   }
 }
