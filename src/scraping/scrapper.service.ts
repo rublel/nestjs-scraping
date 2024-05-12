@@ -5,7 +5,12 @@ import { Product } from './product.interface';
 export class ScrapperService {
   private LocalCache = {};
   constructor() {
-    this.LocalCache = {};
+    setInterval(
+      () => {
+        this.LocalCache = {};
+      },
+      1000 * 60 * 60 * 24,
+    );
   }
   async exec({
     section,
