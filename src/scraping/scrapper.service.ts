@@ -38,7 +38,7 @@ export class ScrapperService {
         .find('.product__category')
         .text()
         .replace(/\n|\t/g, '');
-      const img = e.find('.grid-image__link').attr('href');
+      const img = e.find('.grid-image__image').attr('src');
       // <span class="product__info product__info--price-gross"> <span>99</span> </span>
       // the price is in a span who is in a span whith class product__info product__info--price-gross
 
