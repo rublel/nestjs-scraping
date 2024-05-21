@@ -33,7 +33,7 @@ export class ScrapperService {
     $('div[class^="product product--grid"]').each((index, element) => {
       const e = $(element);
       const title = e.find('.product__name').text().replace(/\n|\t/g, '');
-      const [brand] = title.split(' ');
+      const [brand] = title.split('-');
       const category = e
         .find('.product__category')
         .text()
