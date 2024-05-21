@@ -22,7 +22,7 @@ import { GetProductParamsDto } from './dtos/get-product.dto';
 export class ScrapperController {
   constructor(private readonly scrapperService: ScrapperService) {}
 
-  @Get('decathlon')
+  @Get('kvl')
   @ApiRecordsResponse({ type: [Product], status: 200, isArray: true })
   @HttpCode(HttpStatus.OK)
   async scrap(@Param() { section, category }, @Query() { from, size }) {

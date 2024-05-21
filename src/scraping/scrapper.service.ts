@@ -32,10 +32,41 @@ export class ScrapperService {
       records: any[] = [];
     $('div[class^="product product--grid"]').each((index, element) => {
       const e = $(element);
-      // const title = e.find('.product-title h2').text();
+      //replace \n and \t
+      const title = e.find('.product__name').text().replace(/\n|\t/g, '');
+      const category = e
+        .find('.product__category')
+        .text()
+        .replace(/\n|\t/g, '');
       const img = e.find('.grid-image__link').attr('href');
+      // <span class="product__info product__info--price-gross"> <span>99</span> </span>
+      // the price is in a span who is in a span whith class product__info product__info--price-gross
 
-      records.push({ img });
+      const price = parseFloat(
+        e
+          .find('.product__info.product__info--price-gross span')
+          .text()
+          .replace(/\n|\t/g, ''),
+      );
+      const beforeDiscount = parseFloat(
+        e
+          .find('.product__info.product__info--old-price-gross span')
+          .text()
+          .replace(/\n|\t/g, ''),
+      );
+      const dicsount = beforeDiscount - price;
+      const withDiscount = dicsount > 0;
+      const currency = 'RON';
+      records.push({
+        title,
+        category,
+        price,
+        beforeDiscount,
+        dicsount,
+        withDiscount,
+        currency,
+        img,
+      });
     });
 
     const totalSize = records.length;
