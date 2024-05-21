@@ -24,8 +24,8 @@ export class ScrapperService {
   }): Promise<{ totalSize: number; records: any[] }> {
     const cacheKey = `${section}-${category}-${from}-${size}`;
     if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
-
-    const url = `https://www.kvl.ro/catalog/bermude-96`,
+    const referencePrefix = '261855148';
+    const url = `https://www.kvl.ro/catalog/${category}/p3`,
       response = await fetch(url),
       html = await response.text(),
       $ = cheerio.load(html),
@@ -39,9 +39,7 @@ export class ScrapperService {
         .text()
         .replace(/\n|\t/g, '');
       const img = e.find('.grid-image__image').attr('src');
-      // <span class="product__info product__info--price-gross"> <span>99</span> </span>
-      // the price is in a span who is in a span whith class product__info product__info--price-gross
-
+      const link = e.find('.grid-image__link').attr('href');
       const price = parseFloat(
         e
           .find('.product__info.product__info--price-gross span')
@@ -54,19 +52,21 @@ export class ScrapperService {
           .text()
           .replace(/\n|\t/g, ''),
       );
-      const dicsount = beforeDiscount - price;
-      const withDiscount = dicsount > 0;
+      const discountAmount = beforeDiscount - price;
+      const withDiscount = discountAmount > 0;
       const currency = 'RON';
       records.push({
+        reference: `${referencePrefix}${index}`,
         title,
         brand,
         category,
         price,
         beforeDiscount,
-        dicsount,
+        discountAmount,
         withDiscount,
         currency,
         img,
+        link,
       });
     });
 
