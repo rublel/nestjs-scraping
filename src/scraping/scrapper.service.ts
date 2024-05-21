@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
-import { Product } from './entities/product.entity';
 @Injectable()
 export class ScrapperService {
   private LocalCache = {};
@@ -22,47 +21,24 @@ export class ScrapperService {
     category?: string;
     from?: number;
     size?: number;
-  }): Promise<{ totalSize: number; records: Product[] }> {
+  }): Promise<{ totalSize: number; records: any[] }> {
     const cacheKey = `${section}-${category}-${from}-${size}`;
     if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
 
-    const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
+    const url = `https://www.kvl.ro/catalog/bermude-96`,
       response = await fetch(url),
       html = await response.text(),
       $ = cheerio.load(html),
-      totalSize = Number(
-        $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
-      ),
-      records: Product[] = [];
-    $('div[class^="product-block-top-main"]').each((index, element) => {
+      records: any[] = [];
+    $('div[class^="product product--grid"]').each((index, element) => {
       const e = $(element);
-      const delivery = e.find('.dpb-leadtime').text(),
-        title = e.find('.product-title h2').text(),
-        brand = e.find('.product-title strong').text(),
-        price = e.find('.vtmn-price_size--large').text(),
-        img = e.find('.svelte-11itto').attr('src'),
-        link = `https://www.decathlon.fr${e.find('.dpb-product-model-link').attr('href')}`,
-        discountAmount = e.find('.price-discount-amount').text(),
-        discountDateInfo = e.find('.discount-date').text(),
-        beforeDiscount = e
-          .find('.price-discount-informations .vtmn-price')
-          .text();
+      // const title = e.find('.product-title h2').text();
+      const img = e.find('.grid-image__link').attr('href');
 
-      const product = new Product({
-        title,
-        brand,
-        img,
-        link,
-        price,
-        beforeDiscount,
-        discountAmount,
-        delivery,
-        ...(discountDateInfo && { discountDateInfo }),
-      });
-
-      records.push(product);
+      records.push({ img });
     });
 
+    const totalSize = records.length;
     this.LocalCache = {
       ...this.LocalCache,
       [cacheKey]: { totalSize, records },
