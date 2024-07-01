@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { Product } from './entities/product.entity';
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ScrapperService {
   private LocalCache = {};
   constructor() {
