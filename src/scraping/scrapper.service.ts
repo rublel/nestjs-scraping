@@ -1,7 +1,7 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { Product } from './entities/product.entity';
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class ScrapperService {
   private LocalCache = {};
   constructor() {
@@ -24,7 +24,7 @@ export class ScrapperService {
     size?: number;
   }): Promise<{ totalSize: number; records: Product[] }> {
     const cacheKey = `${section}-${category}-${from}-${size}`;
-    if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
+    // if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
 
     const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
       response = await fetch(url),
@@ -34,14 +34,17 @@ export class ScrapperService {
         $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
       ),
       records: Product[] = [];
+    console.log('url ----->', response);
+    console.log('totalSize ----->', totalSize);
     $('div[class^="product-block-top-main"]').each((index, element) => {
       const e = $(element);
+      console.log('eeeeeeeeee', e.find('.product-title h2').text());
       const delivery = e.find('.dpb-leadtime').text(),
         title = e.find('.product-title h2').text(),
         brand = e.find('.product-title strong').text(),
         price = e.find('.vtmn-price_size--large').text(),
         img = e.find('.svelte-11itto').attr('src'),
-        link = `https://www.decathlon.fr${e.find('.dpb-product-model-link').attr('href')}`,
+        link = `https://www.decathlon.fr${e.find('.vtmn-absolute').attr('href')}`,
         discountAmount = e.find('.price-discount-amount').text(),
         discountDateInfo = e.find('.discount-date').text(),
         beforeDiscount = e
@@ -49,6 +52,8 @@ export class ScrapperService {
           .text();
 
       const product = new Product({
+        section,
+        category,
         title,
         brand,
         img,
@@ -67,7 +72,7 @@ export class ScrapperService {
       ...this.LocalCache,
       [cacheKey]: { totalSize, records },
     };
-
+    console.log(`Records found: ${records.length}`);
     return { totalSize, records };
   }
 
