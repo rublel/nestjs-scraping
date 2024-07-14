@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Product {
+  @ApiProperty({ example: 'femme' })
+  section: string;
+  @ApiProperty({ example: 'vetements' })
+  category: string;
   @ApiProperty({ example: 'Pantalon de trek montagne résistant Homme - MT500' })
   title: string;
   @ApiProperty({ example: 'FORCLAZ' })
   brand: string;
-  @ApiProperty({ example: 'Bermude' })
-  category?: string;
   @ApiProperty({ example: 'gris noir' })
   color?: string;
   @ApiProperty({ example: '8853731' })
@@ -34,7 +36,8 @@ export class Product {
 
   constructor(product: Omit<Product, 'formatPriceToNumber'>) {
     const url = new URLSearchParams(new URL(product.link).search);
-
+    this.section = product.section;
+    this.category = product.category;
     this.title = product.title;
     this.brand = product.brand;
     this.color = url.get('c')?.replace('_', ' ') || 'N/A';

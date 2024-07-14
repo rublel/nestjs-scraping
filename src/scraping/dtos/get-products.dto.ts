@@ -32,7 +32,7 @@ export class GetProductsParamsDto {
 
 export class GetProducsQueryDto {
   @IsOptional()
-  @IsNumberString()
+  // @IsNumberString()
   @ApiProperty({
     type: Number,
     required: false,

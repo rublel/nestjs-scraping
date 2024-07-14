@@ -11,7 +11,7 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1');
   app.use([`${SWAGGER.ROUTE}`], basicAuth(SWAGGER.AUTH));
-
+  //test
   generateSwaggerApi({
     app,
     appConfig: {
