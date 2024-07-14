@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
-import { Product } from './entities/product.entity';
 @Injectable()
 export class ScrapperService {
   private LocalCache = {};
@@ -22,52 +21,56 @@ export class ScrapperService {
     category?: string;
     from?: number;
     size?: number;
-  }): Promise<{ totalSize: number; records: Product[] }> {
+  }): Promise<{ totalSize: number; records: any[] }> {
     const cacheKey = `${section}-${category}-${from}-${size}`;
-    // if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
-
-    const url = `https://www.decathlon.fr/${section}/${category}?from=${from}&size=${size}`,
+    if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
+    const referencePrefix = '261855148';
+    const url = `https://www.kvl.ro/catalog/${category}/p3`,
       response = await fetch(url),
       html = await response.text(),
       $ = cheerio.load(html),
-      totalSize = Number(
-        $('.plp-var-info--content .vtmn-whitespace-nowrap').text(),
-      ),
-      records: Product[] = [];
-    console.log('url ----->', response);
-    console.log('totalSize ----->', totalSize);
-    $('div[class^="product-block-top-main"]').each((index, element) => {
+      records: any[] = [];
+    $('div[class^="product product--grid"]').each((index, element) => {
       const e = $(element);
-      console.log('eeeeeeeeee', e.find('.product-title h2').text());
-      const delivery = e.find('.dpb-leadtime').text(),
-        title = e.find('.product-title h2').text(),
-        brand = e.find('.product-title strong').text(),
-        price = e.find('.vtmn-price_size--large').text(),
-        img = e.find('.svelte-11itto').attr('src'),
-        link = `https://www.decathlon.fr${e.find('.vtmn-absolute').attr('href')}`,
-        discountAmount = e.find('.price-discount-amount').text(),
-        discountDateInfo = e.find('.discount-date').text(),
-        beforeDiscount = e
-          .find('.price-discount-informations .vtmn-price')
-          .text();
-
-      const product = new Product({
-        section,
-        category,
+      const title = e.find('.product__name').text().replace(/\n|\t/g, '');
+      const [brand] = title.split(' -');
+      const category = e
+        .find('.product__category')
+        .text()
+        .replace(/\n|\t/g, '');
+      const img = e.find('.grid-image__image').attr('src');
+      const link = e.find('.grid-image__link').attr('href');
+      const price = parseFloat(
+        e
+          .find('.product__info.product__info--price-gross span')
+          .text()
+          .replace(/\n|\t/g, ''),
+      );
+      const beforeDiscount = parseFloat(
+        e
+          .find('.product__info.product__info--old-price-gross span')
+          .text()
+          .replace(/\n|\t/g, ''),
+      );
+      const discountAmount = beforeDiscount - price;
+      const withDiscount = discountAmount > 0;
+      const currency = 'RON';
+      records.push({
+        reference: `${referencePrefix}${index}`,
         title,
         brand,
-        img,
-        link,
+        category,
         price,
         beforeDiscount,
         discountAmount,
-        delivery,
-        ...(discountDateInfo && { discountDateInfo }),
+        withDiscount,
+        currency,
+        img,
+        link,
       });
-
-      records.push(product);
     });
 
+    const totalSize = records.length;
     this.LocalCache = {
       ...this.LocalCache,
       [cacheKey]: { totalSize, records },

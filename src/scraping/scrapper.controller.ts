@@ -22,7 +22,7 @@ import { GetProductParamsDto } from './dtos/get-product.dto';
 export class ScrapperController {
   constructor(private readonly scrapperService: ScrapperService) {}
 
-  @Get('decathlon/:section/:category')
+  @Get('/:brand/:category')
   @ApiRecordsResponse({ type: [Product], status: 200, isArray: true })
   @HttpCode(HttpStatus.OK)
   async scrap(
@@ -37,7 +37,7 @@ export class ScrapperController {
     });
   }
 
-  @Get('decathlon/:section/:category/:reference')
+  @Get('/:brand/:category/:reference')
   @ApiRecordsResponse({ type: Product, status: 200, isArray: false })
   @HttpCode(HttpStatus.OK)
   async search(@Param() { section, category, reference }: GetProductParamsDto) {

@@ -9,6 +9,8 @@ export class Product {
   title: string;
   @ApiProperty({ example: 'FORCLAZ' })
   brand: string;
+  @ApiProperty({ example: 'Bermude' })
+  category?: string;
   @ApiProperty({ example: 'gris noir' })
   color?: string;
   @ApiProperty({ example: '8853731' })
@@ -52,7 +54,7 @@ export class Product {
     this.discountAmount = this.formatPriceToNumber(product.discountAmount);
     this.discountDateInfo = product.discountDateInfo
       ?.replace('*', '')
-      .replace(/\n/g, '')
+      .replace(/\n|\t/g, '')
       .trim();
   }
 

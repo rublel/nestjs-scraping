@@ -11,18 +11,18 @@ import { HierarchyConfig } from 'src/config/catalog/hierarchy';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetProductsParamsDto {
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   @IsEnum(HierarchyConfig.map(({ section }) => section))
   @ApiProperty({
     enum: HierarchyConfig.map(({ section }) => section),
-    required: true,
+    required: false,
   })
   section: string;
 
   @IsNotEmpty()
   @IsString()
-  @IsEnum(HierarchyConfig.flatMap(({ categories }) => categories))
+  // @IsEnum(HierarchyConfig.flatMap(({ categories }) => categories))
   @ApiProperty({
     enum: HierarchyConfig.flatMap(({ categories }) => categories),
     required: true,
