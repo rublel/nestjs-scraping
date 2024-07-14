@@ -9,8 +9,6 @@ export class Product {
   title: string;
   @ApiProperty({ example: 'FORCLAZ' })
   brand: string;
-  @ApiProperty({ example: 'Bermude' })
-  category?: string;
   @ApiProperty({ example: 'gris noir' })
   color?: string;
   @ApiProperty({ example: '8853731' })

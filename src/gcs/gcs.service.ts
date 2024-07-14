@@ -11,7 +11,7 @@ export class GCSService {
   async uploadImage(image: Buffer, name: string) {
     const { data }: any = await axios
       .post(
-        `https://storage.googleapis.com/upload/storage/v1/b/visual-search-bucket/o?uploadType=media&name=decathlon/${name}&key=AIzaSyDgo_MXIDscgE_0drDLe41VKGUOIieVuN0`,
+        `https://storage.googleapis.com/upload/storage/v1/b/visual-search-bucket/o?uploadType=media&name=kvl/${name}&key=AIzaSyDgo_MXIDscgE_0drDLe41VKGUOIieVuN0`,
         image,
         {
           headers: {
@@ -88,17 +88,13 @@ export class GCSService {
   async createProduct(item: Product) {
     console.log('Creating product', item);
     const product = {
-      displayName: item.title,
+      displayName: item.reference,
       productCategory: 'apparel-v2',
-      description: item.delivery,
+      description: item.title,
       productLabels: [
         {
           key: 'retailer',
-          value: 'Decathlon',
-        },
-        {
-          key: 'style',
-          value: item.section,
+          value: 'kvl',
         },
         {
           key: 'category',
@@ -113,16 +109,11 @@ export class GCSService {
           value: `${item.price} ${item.currency}`,
         },
         {
-          key: 'color',
-          value: item.color,
-        },
-        {
           key: 'reference',
           value: item.reference,
         },
       ],
     };
-    console.log(product);
     const response: any = await axios
       .post(
         `https://vision.googleapis.com/v1/projects/devops-tribe/locations/us-west1/products?key=AIzaSyDgo_MXIDscgE_0drDLe41VKGUOIieVuN0`,
@@ -137,8 +128,6 @@ export class GCSService {
   }
 
   async addProductToProductSet(productName: string) {
-    console.log('productName', productName);
-    //409fddfc470db26c
     const response: any = await axios
       .post(
         `https://vision.googleapis.com/v1/projects/devops-tribe/locations/us-west1/productSets/5b2eb3e30d78ce32:addProduct?key=AIzaSyDgo_MXIDscgE_0drDLe41VKGUOIieVuN0`,
@@ -158,7 +147,7 @@ export class GCSService {
     const buffer = await this.downloadBeforeUpload(uri);
     await this.uploadImage(buffer, `${productId}_0.jpg`);
     const image = {
-      uri: `gs://visual-search-bucket/decathlon/${productId}_0.jpg`,
+      uri: `gs://visual-search-bucket/kvl/${productId}_0.jpg`,
     };
     const response: any = await axios
       .post(

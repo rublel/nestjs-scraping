@@ -24,7 +24,6 @@ export class ScrapperService {
   }): Promise<{ totalSize: number; records: any[] }> {
     const cacheKey = `${section}-${category}-${from}-${size}`;
     if (this.LocalCache[cacheKey]) return this.LocalCache[cacheKey];
-    const referencePrefix = '261855148';
     const url = `https://www.kvl.ro/catalog/${category}/p3`,
       response = await fetch(url),
       html = await response.text(),
@@ -32,6 +31,7 @@ export class ScrapperService {
       records: any[] = [];
     $('div[class^="product product--grid"]').each((index, element) => {
       const e = $(element);
+      const reference = '10271719.VERTJUNGLE';
       const title = e.find('.product__name').text().replace(/\n|\t/g, '');
       const [brand] = title.split(' -');
       const category = e
@@ -56,7 +56,7 @@ export class ScrapperService {
       const withDiscount = discountAmount > 0;
       const currency = 'RON';
       records.push({
-        reference: `${referencePrefix}${index}`,
+        reference,
         title,
         brand,
         category,

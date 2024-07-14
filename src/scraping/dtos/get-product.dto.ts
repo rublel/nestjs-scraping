@@ -4,7 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class GetProductParamsDto extends GetProductsParamsDto {
   @IsNotEmpty()
-  @IsNumberString()
   @ApiProperty({
     type: Number,
     required: true,
